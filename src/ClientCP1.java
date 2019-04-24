@@ -17,13 +17,13 @@ public class ClientCP1{
 
     public static void main(String[] args) {
 
-        String filename = "rr.txt";
+        String filename = "nokia_ringtone.mp3";
         if (args.length > 0) filename = args[0];
 
         String serverAddress = "localhost";
         if (args.length > 1) filename = args[1];
 
-        int port = 4321;
+        int port = 54321;
         if (args.length > 2) port = Integer.parseInt(args[2]);
 
         int numBytes = 0;
@@ -125,14 +125,24 @@ public class ClientCP1{
             // Send the encrypted file
             for (boolean fileEnded = false; !fileEnded;) {
                 numBytes = bufferedFileInputStream.read(fromFileBuffer);
-//                System.out.println(numBytes);
                 fileEnded = numBytes < 117;
                 byte[] encryptedBytes =  encryptCipher.doFinal(fromFileBuffer);
+                int encryptedNumBytes = encryptedBytes.length;
                 toServer.writeInt(1);
+                toServer.writeInt(encryptedNumBytes);
                 toServer.writeInt(numBytes);
-                toServer.writeInt(encryptedBytes.length);
                 toServer.write(encryptedBytes);
                 toServer.flush();
+            }
+
+            while (true){
+                String end = fromServer.readUTF();
+                if (end.equals("Finish reading")){
+                    System.out.println("Server: " + end);
+                    break;
+                }
+                else
+                    System.out.println("End request failed...");
             }
 
             bufferedFileInputStream.close();

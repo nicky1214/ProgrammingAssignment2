@@ -39,7 +39,7 @@ public class ServerCP2 {
             InputStream fis = new FileInputStream("cheowfu.crt");
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             X509Certificate serverCert = (X509Certificate) cf.generateCertificate(fis);
-            PrivateKey privateKey = com.example.csepa2.PrivateKeyReader.get("D:\\Users\\Nicholas\\IdeaProjects\\ProgAssignment2\\src\\private_key.der");
+            PrivateKey privateKey = com.example.csepa2.PrivateKeyReader.get("private_key.der");
             Cipher ecipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             ecipher.init(Cipher.ENCRYPT_MODE, privateKey);
 

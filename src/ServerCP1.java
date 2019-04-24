@@ -11,7 +11,7 @@ public class ServerCP1 {
     public static void main(String[] args) {
 
         boolean authenticated = false;
-        int port = 4321;
+        int port = 54321;
         if (args.length > 0) port = Integer.parseInt(args[0]);
 
         ServerSocket welcomeSocket = null;
@@ -82,9 +82,8 @@ public class ServerCP1 {
                     System.out.println("Receiving file...");
 
                     int numBytes = fromClient.readInt();
-//                    int keynumBytes = fromClient.readInt();
                     byte[] filename = new byte[numBytes];
-//                    String keytoken ="";
+
                     // Must use read fully!
                     // See: https://stackoverflow.com/questions/25897627/datainputstream-read-vs-datainputstream-readfully
 
@@ -100,25 +99,32 @@ public class ServerCP1 {
                     System.out.println("Receiving file packets...");
 
                     int numBytes = fromClient.readInt();
-                    int blocksize = fromClient.readInt();
-                    byte[] block = new byte[blocksize];
-                    fromClient.readFully(block, 0, blocksize);
+                    int decryptedNumBytes = fromClient.readInt();
+                    byte[] block = new byte[numBytes];
+                    fromClient.readFully(block, 0, numBytes);
                     byte[] decryptedBytes = decryptCipher.doFinal(block);
 
-                    if (numBytes > 0)
-                        bufferedFileOutputStream.write(decryptedBytes, 0, numBytes);
+                    if (decryptedNumBytes > 0) {
+                        bufferedFileOutputStream.write(decryptedBytes, 0, decryptedNumBytes);
+                    }
 
-                    if (numBytes < 117) {
+                    if (decryptedNumBytes < 117) {
                         System.out.println("Closing connection...");
-
-                        if (bufferedFileOutputStream != null) bufferedFileOutputStream.close();
-                        if (bufferedFileOutputStream != null) fileOutputStream.close();
+                        toClient.writeUTF("Finish reading");
+                        bufferedFileOutputStream.close();
+                        fileOutputStream.close();
                         fromClient.close();
                         toClient.close();
                         connectionSocket.close();
+
                     }
+
                 }
+
             }
+
+
+
         } catch (Exception e) {e.printStackTrace();}
     }
 }
